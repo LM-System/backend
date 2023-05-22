@@ -4,7 +4,8 @@ const express = require("express");
 const cors = require("cors");
 const pg = require("pg");
 const app = express();
-const client = new pg.Client(/*postgressSql URL*/);
+const port = process.env.PORT;
+const client = new pg.Client(process.env.DATABASE_URL);
 app.use(cors());
 app.use(express.json());
 
@@ -17,6 +18,10 @@ function handeleAddCourse(req, res) {
     res.send("Course added successfully");
   });
 }
+
+app.listen(4000, () => {
+  console.log(`server is running is port ${4000}`);
+});
 
 app.listen(4000, () => {
   console.log(`server is running is port ${4000}`);
