@@ -89,8 +89,23 @@ app.put("/updatestudent/:id", (req, res) => {
     });
 });
 
+app.delete("/deletestudent/:id", (req, res) => {
+  const { id } = req.params;
+  const sql = `DELETE from users where id=${id};`;
+  client
+    .query(sql)
+    .then((data) => {
+      console.log(data);
+      res.status(200).send(data.rows);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+});
+
 client.connect().then(() => {
   app.listen(port, () => {
     console.log(`server is running is port ${port}`);
   });
 });
+// "`[{title:`javascript Course`,startDate:`22-5-2023`,endDate:`22-5-2023`},{title:`DotNet Course`,startDate:`22-5-2023`,endDate:`22-5-2023`}]`"
