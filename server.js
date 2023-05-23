@@ -100,7 +100,6 @@ function handleDeleteStudent(req,res) {
     });
 }
 
-
 function handleAddTeacher(req,res) {
     const { email, password, fname, lname } = req.body;
     const status = "off";
