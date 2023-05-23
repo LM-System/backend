@@ -13,9 +13,15 @@ app.get("/", function (req, res) {
     res.send("Connected");
 });
 
-app.post("/addcourse", handeleAddCourse); //Add Course end point
+app.post("/signin",handleSignIn );
 app.get("/getcourse", handleGetCourse);
-
+app.post("/addcourse", handeleAddCourse); //Add Course end point
+app.post("/addstudent",handleAddStudent) ;
+app.put("/updatestudent/:id",handleUpdateStudent);
+app.delete("/deletestudent/:id",handleDeleteStudent );
+app.post("/addteacher", handleAddTeacher);
+app.put("/updateteacher/:id", handleUpdateTeacher);
+app.delete("/deleteteacher/:id",handleDeleteTeacher);
 function handleGetCourse(req, res) {
   const sql = "select * from course;";
     client.query(sql).then((data) => {
@@ -32,7 +38,8 @@ function handeleAddCourse(req, res) {
     res.send("Course added successfully");
     });
 }
-app.post("/signin", (req, res) => {
+
+function handleSignIn(req,res) {
     const { email, password } = req.body;
     const sql = `select * from users where email=$1 AND password=$2;`;
     client
@@ -43,9 +50,9 @@ app.post("/signin", (req, res) => {
     .catch((e) => {
         console.log(e);
     });
-});
+}
 
-app.post("/addstudent", (req, res) => {
+function handleAddStudent(req,res) {
     const { email, password, fname, lname } = req.body;
     const status = "off";
     const role = "student";
@@ -59,9 +66,9 @@ app.post("/addstudent", (req, res) => {
     .catch((e) => {
         console.log(e);
     });
-});
+}
 
-app.put("/updatestudent/:id", (req, res) => {
+function handleUpdateStudent(req,res){
     const { id } = req.params;
     const { email, password, fname, lname, status } = req.body;
     const role = "student";
@@ -77,11 +84,11 @@ app.put("/updatestudent/:id", (req, res) => {
     .catch((e) => {
         console.log(e);
     });
-});
+}
 
-app.delete("/deletestudent/:id", (req, res) => {
+function handleDeleteStudent(req,res) {
     const { id } = req.params;
-    const sql = `DELETE from users where id=${id};`;
+    const sql = `DELETE from users where id=${id} role="student";`;
     client
     .query(sql)
     .then((data) => {
@@ -91,9 +98,10 @@ app.delete("/deletestudent/:id", (req, res) => {
     .catch((e) => {
         console.log(e);
     });
-});
+}
 
-app.post("/addteacher", (req, res) => {
+
+function handleAddTeacher(req,res) {
     const { email, password, fname, lname } = req.body;
     const status = "off";
     const role = "teacher";
@@ -107,9 +115,9 @@ app.post("/addteacher", (req, res) => {
     .catch((e) => {
         console.log(e);
     });
-});
+}
 
-app.put("/updateteacher/:id", (req, res) => {
+function handleUpdateTeacher(req,res) {
     const { id } = req.params;
     const { email, password, fname, lname, status } = req.body;
     const role = "teacher";
@@ -125,7 +133,22 @@ app.put("/updateteacher/:id", (req, res) => {
     .catch((e) => {
         console.log(e);
     });
-});
+}
+
+function handleDeleteTeacher(req,res) {
+    const { id } = req.params;
+    const role = "teacher";
+    const sql = `DELETE from users where id=$1 AND role=$2 ;`;
+    client
+    .query(sql,[id,role])
+    .then((data) => {
+        console.log(data);
+        res.status(200).send(data.rows);
+    })
+    .catch((e) => {
+        console.log(e);
+    });
+}
 
 client.connect().then(() => {
     app.listen(port, () => {
