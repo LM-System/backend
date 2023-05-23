@@ -18,19 +18,29 @@ app.get("/getcourse", handleGetCourse);
 
 function handleGetCourse(req, res) {
   const sql = "select * from course;";
-  client.query(sql).then((data) => {
-    let dataFromDB = data.rows;
-    res.send(dataFromDB);
-  });
+  client
+    .query(sql)
+    .then((data) => {
+      let dataFromDB = data.rows;
+      res.send(dataFromDB);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
 }
 
 function handeleAddCourse(req, res) {
   // Add course function
   const course = res.body;
   const sql = `INSERT into course (title,descreption,capacity,role,u_id) values ('${course.title}','${course.descreption}','${course.role}','${course.u_id}');`;
-  client.query(sql).then(() => {
-    res.send("Course added successfully");
-  });
+  client
+    .query(sql)
+    .then(() => {
+      res.send("Course added successfully");
+    })
+    .catch((e) => {
+      console.log(e);
+    });
 }
 app.post("/signin", (req, res) => {
   const { email, password } = req.body;
