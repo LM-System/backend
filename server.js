@@ -87,7 +87,22 @@ app.delete("/deletestudent/:id", (req, res) => {
     .then((data) => {
         console.log(data);
         res.status(200).send(data.rows);
+    })
+    .catch((e) => {
+        console.log(e);
+    });
+});
 
+app.post("/addteacher", (req, res) => {
+    const { email, password, fname, lname } = req.body;
+    const status = "off";
+    const role = "teacher";
+    const sql = `INSERT INTO users(email,password,fname,lname,role,status) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *;`;
+    client
+    .query(sql, [email, password, fname, lname, role, status])
+    .then((data) => {
+        console.log(data);
+        res.status(200).send(data.rows);
     })
     .catch((e) => {
         console.log(e);
