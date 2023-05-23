@@ -109,6 +109,24 @@ app.post("/addteacher", (req, res) => {
     });
 });
 
+app.put("/updateteacher/:id", (req, res) => {
+    const { id } = req.params;
+    const { email, password, fname, lname, status } = req.body;
+    const role = "teacher";
+    const sql = `update users set
+    email=$1,password=$2,fname=$3,lname=$4,role=$5,status=$6
+    where id=${id} returning *;`;
+    client
+    .query(sql, [email, password, fname, lname, role, status])
+    .then((data) => {
+        console.log(data);
+        res.status(200).send(data.rows);
+    })
+    .catch((e) => {
+        console.log(e);
+    });
+});
+
 client.connect().then(() => {
     app.listen(port, () => {
     console.log(`server is running is port ${port}`);
