@@ -20,6 +20,9 @@ CREATE TABLE IF NOT EXISTS course(
     u_id int REFERENCES users (id) ON DELETE CASCADE
 );
 
+INSERT INTO course(title,descreption,capacity,role) VALUES ('JS','How to create backend',50,'Student');
+
+
 CREATE TABLE IF NOT EXISTS attendance(
     id SERIAL PRIMARY KEY,
     status varchar(50),
