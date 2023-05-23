@@ -14,7 +14,10 @@ app.get("/", function (req, res) {
 });
 
 app.post("/addcourse", handeleAddCourse); //Add Course end point
-app.get("/getcourse", handleGetCourse);
+app.get("/getcourse", handleGetCourse); // Get course end point
+app.delete("/deletecourse/:id", handleDeleteCourseID); // Delete course by id
+app.put("/updatecourse/:id", handleCourseUpdate); // Update course by id
+app.put("/updatestudentstatues/:id", handleStudentStatusUpdate); // Update student statues when log in end point
 
 function handleGetCourse(req, res) {
   const sql = "select * from course;";
@@ -31,17 +34,69 @@ function handleGetCourse(req, res) {
 
 function handeleAddCourse(req, res) {
   // Add course function
-  const course = res.body;
-  const sql = `INSERT into course (title,descreption,capacity,role,u_id) values ('${course.title}','${course.descreption}','${course.role}','${course.u_id}');`;
+  const { title, descreption, capacity, role, u_id } = req.body;
+  const sql = `INSERT INTO course (title,descreption,capacity,role,u_id) VALUES ($1,$2,$3,$4,$5) RETURNING *;`;
   client
-    .query(sql)
-    .then(() => {
-      res.send("Course added successfully");
+    .query(sql, [title, descreption, capacity, role, u_id])
+    .then((data) => {
+      res.status(200).send(data.rows);
     })
     .catch((e) => {
       console.log(e);
     });
 }
+
+function handleDeleteCourseID(req, res) {
+  const id = req.params.id;
+  const sql = `delete from course where id=${id};`;
+  client
+    .query(sql)
+    .then((data) => {
+      if (data) {
+        res.status(204).send(data.rows);
+      } else {
+        res.status(404).json({ error: "Not found" });
+      }
+    })
+    .catch();
+}
+
+function handleCourseUpdate(req, res) {
+  const id = req.params.id;
+  const { title, descreption, capacity, role } = req.body;
+  const sql = `update course set title=$1,descreption=$2,capacity=$3,role=$4 where id=${id} returning *; `;
+  client
+    .query(sql, [title, descreption, capacity, role])
+    .then((data) => {
+      res.status(200).send(data.rows);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+}
+
+function handleStudentStatusUpdate(req, res) {
+  const id = req.params.id;
+  const { status } = req.body;
+  const sql = `update users set status=$1 where id=${id} and role='STUDENT' returning *;`;
+  client
+    .query(sql, [status])
+    .then((data) => {
+      res.status(200).send(data.rows);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+}
+
+// {
+//     "title": "HTML",
+//     "descreption": "How to create backend",
+//     "capacity": 50,
+//     "role": "Student",
+//     "u_id":1
+//   }
+
 app.post("/signin", (req, res) => {
   const { email, password } = req.body;
   const sql = `select * from users where email=$1 AND password=$2;`;
