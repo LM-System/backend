@@ -9,31 +9,90 @@ const client = new pg.Client(process.env.DATABASE_URL);
 app.use(cors());
 app.use(express.json());
 
-app.get("/", function (req, res) {
-  res.send("Connected");
-});
-
 app.post("/signin", handleSignIn);
+app.post("/signup", handleSignUp);
+//Add Delete Update Course end point
 app.get("/getcourse", handleGetCourse);
-app.post("/addcourse", handeleAddCourse); //Add Course end point
-app.get("/getcourse", handleGetCourse); // Get course end point
-app.delete("/deletecourse/:id", handleDeleteCourseID); // Delete course by id
-app.put("/updatecourse/:id", handleCourseUpdate); // Update course by id
-app.put("/updatestudentstatues/:id", handleStudentStatusUpdate); // Update student statues when log in end point
 
-app.post("/addstudent", handleAddStudent);
+app.post("/addcourse", handeleAddCourse); 
+app.delete("/deletecourse/:id", handleDeleteCourseID); 
+app.put("/updatecourse/:id", handleCourseUpdate); 
+
+// Get user course end point
+app.get("/usercourse/:id", handleUserCourse); 
+
+// Update user status end point
+app.put("/updatestatues/:id", handleStatusUpdate); // Update users statues when log in end point
+
+// Update user status end point
 app.put("/updatestudent/:id", handleUpdateStudent);
 app.delete("/deletestudent/:id", handleDeleteStudent);
-app.post("/addteacher", handleAddTeacher);
+
+// Update and Delete user status end point
 app.put("/updateteacher/:id", handleUpdateTeacher);
 app.delete("/deleteteacher/:id", handleDeleteTeacher);
-function handleGetCourse(req, res) {
-  const sql = "select * from course;";
+
+function handleSignIn(req, res) {
+  const { email, password } = req.body;
+  const sql = `select * from users where email=$1 AND password=$2;`;
+  client
+    .query(sql, [email, password])
+    .then((data) => {
+      console.log(data);
+      let myObj={
+        message:'',
+        rows:null
+    }
+      if (data.rowCount) {
+        myObj.message="success";
+        myObj.rows=data.rows;
+        console.log(myObj)
+        res.status(200).send(myObj);
+      }
+      else{
+        myObj.message="failed";
+        myObj.rows="login failed please try logging with correct data";
+        res.send(myObj);
+      }
+    })
+    .catch((e) => {
+
+      console.log(e);
+    });
+}
+
+function handleSignUp(req,res) {
+  const { email, password, fname, lname,role } = req.body;
+  const status = "off";
+  const sql = `INSERT INTO users(email,password,fname,lname,role,status) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *;`;
+  client.query(sql,[email,password,fname,lname,role,status]).then((data)=>{
+    res.status(200).send(data.rows);
+  })
+  .catch((e) => {
+        res.status(200).send(data.rows);
+
+  });}
+
+  function handleGetCourse(req, res) {
+    const sql = "select * from course;";
+    client
+      .query(sql)
+      .then((data) => {
+        let dataFromDB = data.rows;
+        res.send(dataFromDB);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+
+function handleUserCourse(req,res) {
+  const {id}=req.params;
+  const sql = `select * from course where u_id=${id};`;
   client
     .query(sql)
-    .then((data) => {
-      let dataFromDB = data.rows;
-      res.send(dataFromDB);
+    .then((data) => {;
+      res.send(data.rows);
     })
     .catch((e) => {
       console.log(e);
@@ -83,48 +142,13 @@ function handleCourseUpdate(req, res) {
     });
 }
 
-function handleAddTeacher(req,res) {
-    const { email, password, fname, lname } = req.body;
-    const status = "off";
-    const role = "teacher";
-    const sql = `INSERT INTO users(email,password,fname,lname,role,status) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *;`;
-    client
-function handleStudentStatusUpdate(req, res) {
+function handleStatusUpdate(req, res) {
   const id = req.params.id;
   const { status } = req.body;
-  const sql = `update users set status=$1 where id=${id} and role='STUDENT' returning *;`;
+  const sql = `update users set status=$1 where id=${id} and returning *;`;
   client
     .query(sql, [status])
     .then((data) => {
-      res.status(200).send(data.rows);
-    })
-    .catch((e) => {
-      console.log(e);
-    });
-}
-
-function handleSignIn(req, res) {
-  const { email, password } = req.body;
-  const sql = `select * from users where email=$1 AND password=$2;`;
-  client
-    .query(sql, [email, password])
-    .then((data) => {
-      res.status(200).send(data.rows);
-    })
-    .catch((e) => {
-      console.log(e);
-    });
-}
-
-function handleAddStudent(req, res) {
-  const { email, password, fname, lname } = req.body;
-  const status = "off";
-  const role = "student";
-  const sql = `INSERT INTO users(email,password,fname,lname,role,status) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *;`;
-  client
-    .query(sql, [email, password, fname, lname, role, status])
-    .then((data) => {
-      console.log(data);
       res.status(200).send(data.rows);
     })
     .catch((e) => {
@@ -152,28 +176,12 @@ function handleUpdateStudent(req, res) {
 
 function handleDeleteStudent(req, res) {
   const { id } = req.params;
-  const sql = `DELETE from users where id=${id} role="student";`;
+  const sql = `DELETE from users where id=${id} AND role="student";`;
   client
     .query(sql)
     .then((data) => {
       console.log(data);
       res.status(200).send(data.rows);
-      console.log(data);
-      res.status(200).send(data.rows);
-    })
-    .catch((e) => {
-      console.log(e);
-    });
-}
-
-function handleAddTeacher(req, res) {
-  const { email, password, fname, lname } = req.body;
-  const status = "off";
-  const role = "teacher";
-  const sql = `INSERT INTO users(email,password,fname,lname,role,status) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *;`;
-  client
-    .query(sql, [email, password, fname, lname, role, status])
-    .then((data) => {
       console.log(data);
       res.status(200).send(data.rows);
     })
@@ -220,4 +228,4 @@ client.connect().then(() => {
     console.log(`server is running is port ${port}`);
   });
 });
-// "`[{title:`javascript Course`,startDate:`22-5-2023`,endDate:`22-5-2023`},{title:`DotNet Course`,startDate:`22-5-2023`,endDate:`22-5-2023`}]`;
+/*// "`[{title:`javascript Course`,startDate:`22-5-2023`,endDate:`22-5-2023`},{title:`DotNet Course`,startDate:`22-5-2023`,endDate:`22-5-2023`}]`;*/
