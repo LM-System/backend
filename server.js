@@ -145,7 +145,7 @@ function handleCourseUpdate(req, res) {
 function handleStatusUpdate(req, res) {
   const id = req.params.id;
   const { status } = req.body;
-  const sql = `update users set status=$1 where id=${id} and returning *;`;
+  const sql = `update users set status=$1 where id=${id} returning *;`;
   client
     .query(sql, [status])
     .then((data) => {
