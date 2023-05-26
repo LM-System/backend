@@ -1,12 +1,12 @@
-DROP TABLE USERS
+DROP TABLE USERS;
 CREATE TABLE IF NOT EXISTS users(
     id SERIAL PRIMARY KEY,
     email varchar(255),
     password varchar(255),
     fname varchar(255),
     lname varchar(255),
-    role varchar(255),
-    status varchar(255)
+    role varchar(255) default 'student',
+    status varchar(255) default 'off'
 );
 
 CREATE TABLE IF NOT EXISTS course(
@@ -14,11 +14,10 @@ CREATE TABLE IF NOT EXISTS course(
     title varchar(255),
     descreption varchar(255),
     capacity int,
-    role varchar(255),
+    role varchar(255) default 'student',
     u_id int REFERENCES users (id) ON DELETE CASCADE
 );
 
-INSERT INTO course(title,descreption,capacity,role) VALUES ('JS','How to create backend',50,'Student');
 
 
 CREATE TABLE IF NOT EXISTS attendance(
