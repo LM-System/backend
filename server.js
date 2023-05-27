@@ -11,6 +11,10 @@ app.use(express.json());
 
 app.post("/signin", handleSignIn);
 app.post("/signup", handleSignUp);
+
+// get users end point
+app.get("/getusers", handleGetUsers);
+
 //Add Delete Update Course end point
 app.get("/getcourse", handleGetCourse);
 
@@ -24,7 +28,7 @@ app.get("/usercourse/:id", handleUserCourse);
 // Update user status end point
 app.put("/updatestatues/:id", handleStatusUpdate); // Update users statues when log in end point
 
-// Update user status end point
+// Update user student end point
 app.put("/updatestudent/:id", handleUpdateStudent);
 app.delete("/deletestudent/:id", handleDeleteStudent);
 
@@ -80,6 +84,18 @@ function handleSignUp(req,res) {
       .then((data) => {
         let dataFromDB = data.rows;
         res.send(dataFromDB);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+
+  function handleGetUsers(req, res) {
+    const sql = "select * from users;";
+    client
+      .query(sql)
+      .then((data) => {
+        res.send( data.rows);
       })
       .catch((e) => {
         console.log(e);
