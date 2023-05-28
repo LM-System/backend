@@ -18,12 +18,12 @@ app.get("/getusers", handleGetUsers);
 //Add Delete Update Course end point
 app.get("/getcourse", handleGetCourse);
 
-app.post("/addcourse", handeleAddCourse); 
-app.delete("/deletecourse/:id", handleDeleteCourseID); 
-app.put("/updatecourse/:id", handleCourseUpdate); 
+app.post("/addcourse", handeleAddCourse);
+app.delete("/deletecourse/:id", handleDeleteCourseID);
+app.put("/updatecourse/:id", handleCourseUpdate);
 
 // Get user course end point
-app.get("/usercourse/:id", handleUserCourse); 
+app.get("/usercourse/:id", handleUserCourse);
 
 // Update user status end point
 app.put("/updatestatues/:id", handleStatusUpdate); // Update users statues when log in end point
@@ -39,6 +39,10 @@ app.delete("/deleteuser/:id", handleDeleteUser);
 
 // Update and Delete user status end point
 
+app.get("/getanouncment", handleGetAnouncment); // Get all anouncments
+app.post("/addanouncment", handleAddAnouncment); // Add anouncment
+app.delete("/deleteanouncment/:id", handleDeleteAnouncment); // Delete anouncment
+app.put("/updateanouncment/:id", handleanouncmentUpdate); // Update anouncment
 
 function handleSignIn(req, res) {
   const { email, password } = req.body;
@@ -47,91 +51,62 @@ function handleSignIn(req, res) {
     .query(sql, [email, password])
     .then((data) => {
       console.log(data);
-      let myObj={
-        message:'',
-        rows:null
-    }
+      let myObj = {
+        message: "",
+        rows: null,
+      };
       if (data.rowCount) {
-        myObj.message="success";
-        myObj.rows=data.rows;
-        console.log(myObj)
+        myObj.message = "success";
+        myObj.rows = data.rows;
+        console.log(myObj);
         res.status(200).send(myObj);
-      }
-      else{
-        myObj.message="failed";
-        myObj.rows="login failed please try logging with correct data";
+      } else {
+        myObj.message = "failed";
+        myObj.rows = "login failed please try logging with correct data";
         res.send(myObj);
       }
     })
     .catch((e) => {
-
       console.log(e);
     });
 }
 
-function handleSignUp(req,res) {
-  const { email, password, fname, lname,role } = req.body;
+function handleSignUp(req, res) {
+  const { email, password, fname, lname, role } = req.body;
   const status = "off";
   const sql = `INSERT INTO users(email,password,fname,lname,role,status,image_path) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *;`;
-  client.query(sql,[email,password,fname,lname,role,status]).then((data)=>{
-    res.status(200).send(data.rows);
-  })
-  .catch((e) => {
-        res.status(200).send(data.rows);
-
-  });}
-
-  function handleGetCourse(req, res) {
-    const sql = "select * from course;";
-    client
-      .query(sql)
-      .then((data) => {
-        let dataFromDB = data.rows;
-        res.send(dataFromDB);
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  }
-
-function handleUserInformation(req,res) {
-  const { id } = req.params;
-  const { email, fname, lname, password,image_path } = req.body;
-  const sql = `update users set
-    email=$1,fname=$2,lname=$3,password=$4,image_path=$5
-    where id=${id} returning *;`;
   client
-    .query(sql, [email, fname, lname,password])
+    .query(sql, [email, password, fname, lname, role, status])
     .then((data) => {
-          res.send( data.rows);
+      res.status(200).send(data.rows);
+    })
+    .catch((e) => {
+      res.status(200).send(data.rows);
+    });
+}
+
+function handleGetCourse(req, res) {
+  const sql = "select * from course;";
+  client
+    .query(sql)
+    .then((data) => {
+      let dataFromDB = data.rows;
+      res.send(dataFromDB);
     })
     .catch((e) => {
       console.log(e);
     });
 }
 
-
-  function handleGetUsers(req, res) {
-    const sql = "select * from users;";
-    client
-      .query(sql)
-      .then((data) => {
-        res.send( data.rows);
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  }
-
-
-
-
-function handleUserCourse(req,res) {
-  const {id}=req.params;
-  const sql = `select * from course where u_id=${id};`;
+function handleUserInformation(req, res) {
+  const { id } = req.params;
+  const { email, fname, lname, password, image_path } = req.body;
+  const sql = `update users set
+    email=$1,fname=$2,lname=$3,password=$4,image_path=$5
+    where id=${id} returning *;`;
   client
-    .query(sql)
-    .then((data) => {;
+    .query(sql, [email, fname, lname, password])
+    .then((data) => {
       res.send(data.rows);
     })
     .catch((e) => {
@@ -139,8 +114,30 @@ function handleUserCourse(req,res) {
     });
 }
 
+function handleGetUsers(req, res) {
+  const sql = "select * from users;";
+  client
+    .query(sql)
+    .then((data) => {
+      res.send(data.rows);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+}
 
-
+function handleUserCourse(req, res) {
+  const { id } = req.params;
+  const sql = `select * from course where u_id=${id};`;
+  client
+    .query(sql)
+    .then((data) => {
+      res.send(data.rows);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+}
 
 function handeleAddCourse(req, res) {
   // Add course function
@@ -210,11 +207,9 @@ function handleUpdateUser(req, res) {
     .query(sql, [email, fname, lname, role, status])
     .then(() => {
       const mysql = "select * from users;";
-      client
-        .query(mysql)
-        .then((data) => {
-          res.send( data.rows);
-        })
+      client.query(mysql).then((data) => {
+        res.send(data.rows);
+      });
     })
     .catch((e) => {
       console.log(e);
@@ -227,18 +222,73 @@ function handleDeleteUser(req, res) {
     .query(sql)
     .then(() => {
       const mysql = "select * from users;";
-      client
-        .query(mysql)
-        .then((data) => {
-          res.send( data.rows);
-        })
+      client.query(mysql).then((data) => {
+        res.send(data.rows);
+      });
     })
     .catch((e) => {
       console.log(e);
     });
 }
 
+function handleGetAnouncment(req, res) {
+  const sql = "select * from anouncment;";
+  client
+    .query(sql)
+    .then((data) => {
+      let dataFromDB = data.rows;
+      res.send(dataFromDB);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+}
 
+function handleAddAnouncment(req, res) {
+  // Add anouncment function
+  const { anouncment_title, anouncment_body } = req.body;
+  const sql = `INSERT INTO anouncment (anouncment_title,anouncment_body) VALUES ($1,$2) RETURNING *;`;
+  client
+    .query(sql, [anouncment_title, anouncment_body])
+    .then(() => {
+      res.send("Added");
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+}
+
+function handleDeleteAnouncment(req, res) {
+  const { id } = req.params;
+  const sql = `DELETE from anouncment where id=${id} RETURNING *;`;
+  client
+    .query(sql)
+    .then(() => {
+      const mysql = "select * from anouncment;";
+      client.query(mysql).then((data) => {
+        res.send(data.rows);
+      });
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+}
+
+function handleanouncmentUpdate(req, res) {
+  const { id } = req.params;
+  const { anouncment_title, anouncment_body } = req.body;
+  const sql = `update anouncment set
+  anouncment_title=$1,anouncment_body=$2
+    where id=${id} returning *;`;
+  client
+    .query(sql, [anouncment_title, anouncment_body])
+    .then((data) => {
+      res.send(data.rows);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+}
 
 client.connect().then(() => {
   app.listen(port, () => {
