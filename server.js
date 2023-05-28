@@ -72,7 +72,7 @@ function handleSignIn(req, res) {
 function handleSignUp(req,res) {
   const { email, password, fname, lname,role } = req.body;
   const status = "off";
-  const sql = `INSERT INTO users(email,password,fname,lname,role,status) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *;`;
+  const sql = `INSERT INTO users(email,password,fname,lname,role,status,image_path) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *;`;
   client.query(sql,[email,password,fname,lname,role,status]).then((data)=>{
     res.status(200).send(data.rows);
   })
@@ -96,9 +96,9 @@ function handleSignUp(req,res) {
 
 function handleUserInformation(req,res) {
   const { id } = req.params;
-  const { email, fname, lname, password } = req.body;
+  const { email, fname, lname, password,image_path } = req.body;
   const sql = `update users set
-    email=$1,fname=$2,lname=$3,password=$4
+    email=$1,fname=$2,lname=$3,password=$4,image_path=$5
     where id=${id} returning *;`;
   client
     .query(sql, [email, fname, lname,password])
@@ -185,9 +185,6 @@ function handleCourseUpdate(req, res) {
     });
 }
 
-
-
-
 function handleStatusUpdate(req, res) {
   const id = req.params.id;
   const { status } = req.body;
@@ -201,8 +198,6 @@ function handleStatusUpdate(req, res) {
       console.log(e);
     });
 }
-
-
 
 function handleUpdateUser(req, res) {
   const { id } = req.params;
