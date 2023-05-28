@@ -30,6 +30,11 @@ app.put("/updatestatues/:id", handleStatusUpdate); // Update users statues when 
 
 // Update user student end point
 app.put("/updateuser/:id", handleUpdateUser);
+
+// Update user Information end point
+app.put("/userinformtion/:id", handleUserInformation);
+
+// Delete user student end point
 app.delete("/deleteuser/:id", handleDeleteUser);
 
 // Update and Delete user status end point
@@ -89,7 +94,21 @@ function handleSignUp(req,res) {
       });
   }
 
-
+function handleUserInformation(req,res) {
+  const { id } = req.params;
+  const { email, fname, lname, password } = req.body;
+  const sql = `update users set
+    email=$1,fname=$2,lname=$3,password=$4
+    where id=${id} returning *;`;
+  client
+    .query(sql, [email, fname, lname,password])
+    .then((data) => {
+          res.send( data.rows);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+}
 
 
   function handleGetUsers(req, res) {
@@ -206,7 +225,6 @@ function handleUpdateUser(req, res) {
       console.log(e);
     });
 }
-
 function handleDeleteUser(req, res) {
   const { id } = req.params;
   const sql = `DELETE from users where id=${id} RETURNING *;`;
