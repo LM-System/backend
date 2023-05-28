@@ -29,12 +29,11 @@ app.get("/usercourse/:id", handleUserCourse);
 app.put("/updatestatues/:id", handleStatusUpdate); // Update users statues when log in end point
 
 // Update user student end point
-app.put("/updatestudent/:id", handleUpdateStudent);
-app.delete("/deletestudent/:id", handleDeleteStudent);
+app.put("/updateuser/:id", handleUpdateUser);
+app.delete("/deleteuser/:id", handleDeleteUser);
 
 // Update and Delete user status end point
-app.put("/updateteacher/:id", handleUpdateTeacher);
-app.delete("/deleteteacher/:id", handleDeleteTeacher);
+
 
 function handleSignIn(req, res) {
   const { email, password } = req.body;
@@ -90,6 +89,9 @@ function handleSignUp(req,res) {
       });
   }
 
+
+
+
   function handleGetUsers(req, res) {
     const sql = "select * from users;";
     client
@@ -101,6 +103,9 @@ function handleSignUp(req,res) {
         console.log(e);
       });
   }
+
+
+
 
 function handleUserCourse(req,res) {
   const {id}=req.params;
@@ -114,6 +119,9 @@ function handleUserCourse(req,res) {
       console.log(e);
     });
 }
+
+
+
 
 function handeleAddCourse(req, res) {
   // Add course function
@@ -158,6 +166,9 @@ function handleCourseUpdate(req, res) {
     });
 }
 
+
+
+
 function handleStatusUpdate(req, res) {
   const id = req.params.id;
   const { status } = req.body;
@@ -172,76 +183,53 @@ function handleStatusUpdate(req, res) {
     });
 }
 
-function handleUpdateStudent(req, res) {
+
+
+function handleUpdateUser(req, res) {
   const { id } = req.params;
-  const { email, password, fname, lname, status } = req.body;
+  const { email, fname, lname, status } = req.body;
   const role = "student";
   const sql = `update users set
-    email=$1,password=$2,fname=$3,lname=$4,role=$5,status=$6
+    email=$1,fname=$2,lname=$3,role=$4,status=$5
     where id=${id} returning *;`;
   client
-    .query(sql, [email, password, fname, lname, role, status])
-    .then((data) => {
-      console.log(data);
-      res.status(200).send(data.rows);
+    .query(sql, [email, fname, lname, role, status])
+    .then(() => {
+      const mysql = "select * from users;";
+      client
+        .query(mysql)
+        .then((data) => {
+          res.send( data.rows);
+        })
     })
     .catch((e) => {
       console.log(e);
     });
 }
 
-function handleDeleteStudent(req, res) {
+function handleDeleteUser(req, res) {
   const { id } = req.params;
-  const sql = `DELETE from users where id=${id} AND role="student";`;
+  const sql = `DELETE from users where id=${id} RETURNING *;`;
   client
     .query(sql)
-    .then((data) => {
-      console.log(data);
-      res.status(200).send(data.rows);
-      console.log(data);
-      res.status(200).send(data.rows);
+    .then(() => {
+      const mysql = "select * from users;";
+      client
+        .query(mysql)
+        .then((data) => {
+          res.send( data.rows);
+        })
     })
     .catch((e) => {
       console.log(e);
     });
 }
 
-function handleUpdateTeacher(req, res) {
-  const { id } = req.params;
-  const { email, password, fname, lname, status } = req.body;
-  const role = "teacher";
-  const sql = `update users set
-    email=$1,password=$2,fname=$3,lname=$4,role=$5,status=$6
-    where id=${id} returning *;`;
-  client
-    .query(sql, [email, password, fname, lname, role, status])
-    .then((data) => {
-      console.log(data);
-      res.status(200).send(data.rows);
-    })
-    .catch((e) => {
-      console.log(e);
-    });
-}
 
-function handleDeleteTeacher(req, res) {
-  const { id } = req.params;
-  const role = "teacher";
-  const sql = `DELETE from users where id=$1 AND role=$2 ;`;
-  client
-    .query(sql, [id, role])
-    .then((data) => {
-      console.log(data);
-      res.status(200).send(data.rows);
-    })
-    .catch((e) => {
-      console.log(e);
-    });
-}
 
 client.connect().then(() => {
   app.listen(port, () => {
     console.log(`server is running is port ${port}`);
   });
 });
-/*// "`[{title:`javascript Course`,startDate:`22-5-2023`,endDate:`22-5-2023`},{title:`DotNet Course`,startDate:`22-5-2023`,endDate:`22-5-2023`}]`;*/
+/*// "`title:"JavaScript Scholarship",classroom:"1724",level:"begginers",courses:[{title:``,startDate:`22-5-2023`,endDate:`22-5-2023`},{title:`JavaScript fundementals`,startDate:`22-5-2023`,endDate:`22-5-2023`}]`;*/
