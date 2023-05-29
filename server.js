@@ -87,7 +87,7 @@ function handleSignUp(req, res) {
 }
 
 function handleGetCourse(req, res) {
-  const sql = "select * from course;";
+  const sql = "select * from course ORDER BY id ASC;";
   client
     .query(sql)
     .then((data) => {
@@ -193,7 +193,7 @@ function handleUpdateUser(req, res) {
   client
     .query(sql, [email, fname, lname, role, status])
     .then(() => {
-      const mysql = "select * from users;";
+      const mysql = "select * from users ORDER BY id ASC;";
       client.query(mysql).then((data) => {
         res.send(data.rows);
       });
@@ -208,7 +208,7 @@ function handleDeleteUser(req, res) {
   client
     .query(sql)
     .then(() => {
-      const mysql = "select * from users;";
+      const mysql = "select * from users ORDER BY id ASC;";
       client.query(mysql).then((data) => {
         res.send(data.rows);
       });
@@ -251,7 +251,7 @@ function handleDeleteAnouncment(req, res) {
   client
     .query(sql)
     .then(() => {
-      const mysql = "select * from anouncment;";
+      const mysql = "select * from anouncment ORDER BY id DESC;";
       client.query(mysql).then((data) => {
         res.send(data.rows);
       });
@@ -311,7 +311,7 @@ function handeleAdminSignUp(req, res) {
             client
               .query(oursql)
               .then((data) => {
-                const Usql = "select * from users;";
+                const Usql = "select * from users ORDER BY id ASC;";
                 client
                   .query(Usql)
                   .then((data) => {
