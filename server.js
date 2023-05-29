@@ -4,7 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const pg = require("pg");
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 4500;
 const client = new pg.Client(process.env.DATABASE_URL);
 app.use(cors());
 app.use(express.json());
@@ -14,6 +14,7 @@ app.post("/signup", handleSignUp);
 
 // get users end point
 app.get("/getusers", handleGetUsers);
+
 
 //Add Delete Update Course end point
 app.get("/getcourse", handleGetCourse);
@@ -279,9 +280,9 @@ function handleanouncmentUpdate(req, res) {
 function handeleAdminSignUp(req, res) {
   // Admin Add course function
   const { title, descreption, capacity, start_date, end_date, role, email, password, fname, lname, gender,birth_date } = req.body;
-  const sql = `INSERT INTO user_course(title,descreption,capacity,start_date,end_date,role,email,password,fname,lname,gender) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *;`;
+  const sql = `INSERT INTO user_course(title,descreption,capacity,start_date,end_date,role,email,password,fname,lname,gender,birth_date) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *;`;
   client
-    .query(sql, [title,descreption,capacity,start_date,end_date,role,email,password,fname,lname,gender,birth_date])
+    .query(sql, [title, descreption, capacity, start_date, end_date, role, email, password, fname, lname, gender,birth_date])
     .then((data) => {
      const myId=data.rows[0].id
      const myTitle=data.rows[0].title
@@ -302,7 +303,7 @@ function handeleAdminSignUp(req, res) {
        .query(mysql, [myEmail, myPassword, myFname, myLname, myRole,myGender,myBirth_date ])
        .then((data) => {
         const ourID=data.rows[0].id;
-        const oursql = `INSERT INTO course (title,descreption,capacity,start_date,end_date,role,u_id) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *;`;
+        const oursql = `INSERT INTO course(title,descreption,capacity,start_date,end_date,role,u_id) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *;`;
         client
           .query(oursql, [myTitle, myDescreption, myCapacity,myStart_date,myEnd_date, myRole, ourID])
           .then((data) => {
@@ -344,4 +345,5 @@ client.connect().then(() => {
     console.log(`server is running is port ${port}`);
   });
 });
+
 
