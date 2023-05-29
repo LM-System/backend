@@ -293,10 +293,10 @@ function handleanouncmentUpdate(req, res) {
 
 function handeleAdminSignUp(req, res) {
   // Admin Add course function
-  const { title, descreption, capacity, start_date, end_date, role, email, password, fname, lname, gender } = req.body;
-  const sql = `INSERT INTO user_course(title,descreption,capacity,start_date,end_date,role,email,password,fname,lname,gender) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *;`;
+  const { title, descreption, capacity, start_date, end_date, role, email, password, fname, lname, gender,birth_date } = req.body;
+  const sql = `INSERT INTO user_course(title,descreption,capacity,start_date,end_date,role,email,password,fname,lname,gender) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *;`;
   client
-    .query(sql, [title,descreption,capacity,start_date,end_date,role,email,password,fname,lname,gender])
+    .query(sql, [title,descreption,capacity,start_date,end_date,role,email,password,fname,lname,gender,birth_date])
     .then((data) => {
      const myId=data.rows[0].id
      const myTitle=data.rows[0].title
@@ -306,14 +306,15 @@ function handeleAdminSignUp(req, res) {
      const myEnd_date=data.rows[0].end_date
      const myRole=data.rows[0].role
      const myEmail=data.rows[0].email
+     const myBirth_date=data.rows[0].birth_date
      const myPassword=data.rows[0].password
      const myFname=data.rows[0].fname
      const myLname=data.rows[0].lname
      const myGender=data.rows[0].gender
      console.log(myEmail);
-     const mysql = `INSERT INTO users(email,password,fname,lname,role,gender) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *;`;
+     const mysql = `INSERT INTO users(email,password,fname,lname,role,gender,birth_date) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *;`;
      client
-       .query(mysql, [myEmail, myPassword, myFname, myLname, myRole,myGender ])
+       .query(mysql, [myEmail, myPassword, myFname, myLname, myRole,myGender,myBirth_date ])
        .then((data) => {
         const ourID=data.rows[0].id;
         const oursql = `INSERT INTO course (title,descreption,capacity,start_date,end_date,role,u_id) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *;`;
