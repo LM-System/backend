@@ -342,11 +342,11 @@ function handeleAdminSignUp(req, res) {
 
 function handeleAdminCourse(req,res) {
   const u_id =req.params.id
-  const { title, descreption, role} = req.body;
+  const { title, descreption, role,start_date,end_date} = req.body;
   const capacity=40
-  const sql = `INSERT INTO course (title,descreption,capacity,role,u_id) VALUES ($1,$2,$3,$4,$5) RETURNING *;`;
+  const sql = `INSERT INTO course (title,descreption,capacity,role,u_id,start_date,end_date) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *;`;
   client
-    .query(sql, [title, descreption, capacity, role, u_id])
+    .query(sql, [title, descreption, capacity, role, u_id,start_date,end_date])
     .then((data) => {
       res.status(200).send(data.rows);
     })
