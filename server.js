@@ -103,12 +103,13 @@ function handleGetCourse(req, res) {
 
 function handleUserInformation(req, res) {
   const { id } = req.params;
-  const { email, fname, lname, password, image_path } = req.body;
+  // id |     email     | password | fname | lname |  role   | status | image_path | gender | birth_date | bio
+  const { email, fname, lname, password, image_path,gender,birth_date,bio } = req.body;
   const sql = `update users set
-    email=$1,fname=$2,lname=$3,password=$4,image_path=$5
+    email=$1,fname=$2,lname=$3,password=$4,image_path=$5,gender=$6,birth_date=$7,bio=$8
     where id=${id} returning *;`;
   client
-    .query(sql, [email, fname, lname, password])
+    .query(sql, [email, fname, lname, password, image_path,gender,birth_date,bio])
     .then((data) => {
       res.send(data.rows);
     })
@@ -232,7 +233,7 @@ function handleDeleteUser(req, res) {
 }
 
 function handleGetAnouncment(req, res) {
-  const sql = "select * from anouncment;";
+  const sql = "select * from anouncment ORDER BY id DESC;";
   client
     .query(sql)
     .then((data) => {
@@ -292,36 +293,45 @@ function handleanouncmentUpdate(req, res) {
 
 function handeleAdminSignUp(req, res) {
   // Admin Add course function
-  const { title, descreption, capacity, role, email,password,fname,lname } = req.body;
-  const sql = `INSERT INTO user_course(title,descreption,capacity,role,email,password,fname,lname) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *;`;
+  const { title, descreption, capacity, start_date, end_date, role, email, password, fname, lname, gender } = req.body;
+  const sql = `INSERT INTO user_course(title,descreption,capacity,start_date,end_date,role,email,password,fname,lname,gender) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *;`;
   client
-    .query(sql, [title, descreption, capacity, role, email,password,fname,lname])
+    .query(sql, [title,descreption,capacity,start_date,end_date,role,email,password,fname,lname,gender])
     .then((data) => {
      const myId=data.rows[0].id
      const myTitle=data.rows[0].title
      const myDescreption=data.rows[0].descreption
      const myCapacity=data.rows[0].capacity
+     const myStart_date=data.rows[0].start_date
+     const myEnd_date=data.rows[0].end_date
      const myRole=data.rows[0].role
      const myEmail=data.rows[0].email
      const myPassword=data.rows[0].password
      const myFname=data.rows[0].fname
      const myLname=data.rows[0].lname
+     const myGender=data.rows[0].gender
      console.log(myEmail);
-     const mysql = `INSERT INTO users(email,password,fname,lname,role) VALUES ($1,$2,$3,$4,$5) RETURNING *;`;
+     const mysql = `INSERT INTO users(email,password,fname,lname,role,gender) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *;`;
      client
-       .query(mysql, [myEmail, myPassword, myFname, myLname, myRole ])
+       .query(mysql, [myEmail, myPassword, myFname, myLname, myRole,myGender ])
        .then((data) => {
         const ourID=data.rows[0].id;
-        const oursql = `INSERT INTO course (title,descreption,capacity,role,u_id) VALUES ($1,$2,$3,$4,$5) RETURNING *;`;
+        const oursql = `INSERT INTO course (title,descreption,capacity,start_date,end_date,role,u_id) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *;`;
         client
-          .query(oursql, [myTitle, myDescreption, myCapacity, myRole, ourID])
+          .query(oursql, [myTitle, myDescreption, myCapacity,myStart_date,myEnd_date, myRole, ourID])
           .then((data) => {
-            const oursql = `delete from course where id=${myId} RETURNING *;`;
+            const oursql = `delete from user_course where id=${myId} RETURNING *;`;
             client
               .query(oursql)
               .then((data) => {
-                  res.status(204).send(data.rows);
-                })          })
+                const Usql = "select * from users;";
+                client
+                  .query(Usql)
+                  .then((data) => {
+                    res.send(data.rows);
+                  })
+                })  
+                      })
       })
        .catch((e) => {
         console.log(e);
@@ -348,6 +358,4 @@ client.connect().then(() => {
     console.log(`server is running is port ${port}`);
   });
 });
-/*// "`title:"JavaScript Scholarship",classroom:"1724",level:"begginers",courses:[{title:``,startDate:`22-5-2023`,endDate:`22-5-2023`},{title:`JavaScript fundementals`,startDate:`22-5-2023`,endDate:`22-5-2023`}]`;*/
-// myTitle,myDescreption,myDapacity,myRole,myEmail,myPassword,myFname,myLname
-//      data.rows[0]
+
