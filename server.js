@@ -28,9 +28,6 @@ app.post("/adminsignup", handeleAdminSignUp);
 // Get user course end point
 app.get("/usercourse/:id", handleUserCourse);
 
-// Update user status end point
-app.put("/updatestatues/:id", handleStatusUpdate); // Update users statues when log in end point
-
 // Update user student end point
 app.put("/updateuser/:id", handleUpdateUser);
 
@@ -104,12 +101,12 @@ function handleGetCourse(req, res) {
 function handleUserInformation(req, res) {
   const { id } = req.params;
   // id |     email     | password | fname | lname |  role   | status | image_path | gender | birth_date | bio
-  const { email, fname, lname, password, image_path,gender,birth_date,bio } = req.body;
+  const { email, fname, lname, password, image_path,gender,birth_date,bio,status } = req.body;
   const sql = `update users set
-    email=$1,fname=$2,lname=$3,password=$4,image_path=$5,gender=$6,birth_date=$7,bio=$8
+    email=$1,fname=$2,lname=$3,password=$4,image_path=$5,gender=$6,birth_date=$7,bio=$8,status=$9
     where id=${id} returning *;`;
   client
-    .query(sql, [email, fname, lname, password, image_path,gender,birth_date,bio])
+    .query(sql, [email, fname, lname, password, image_path,gender,birth_date,bio,status])
     .then((data) => {
       res.send(data.rows);
     })
@@ -183,19 +180,7 @@ function handleCourseUpdate(req, res) {
     });
 }
 
-function handleStatusUpdate(req, res) {
-  const id = req.params.id;
-  const { status } = req.body;
-  const sql = `update users set status=$1 where id=${id} returning *;`;
-  client
-    .query(sql, [status])
-    .then((data) => {
-      res.status(200).send(data.rows);
-    })
-    .catch((e) => {
-      console.log(e);
-    });
-}
+
 
 function handleUpdateUser(req, res) {
   const { id } = req.params;
