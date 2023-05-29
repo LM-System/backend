@@ -117,7 +117,7 @@ function handleUserInformation(req, res) {
 }
 
 function handleGetUsers(req, res) {
-  const sql = "select * from users;";
+  const sql = "select * from users ORDER BY id ASC;";
   client
     .query(sql)
     .then((data) => {
