@@ -17,10 +17,13 @@ app.get("/getusers", handleGetUsers);
 
 //Add Delete Update Course end point
 app.get("/getcourse", handleGetCourse);
-
 app.post("/addcourse", handeleAddCourse);
 app.delete("/deletecourse/:id", handleDeleteCourseID);
 app.put("/updatecourse/:id", handleCourseUpdate);
+
+// Add user course end point
+app.post("/admincourse/:id", handeleAdminCourse);
+app.post("/adminsignup", handeleAdminSignUp);
 
 // Get user course end point
 app.get("/usercourse/:id", handleUserCourse);
@@ -159,13 +162,10 @@ function handleDeleteCourseID(req, res) {
   client
     .query(sql)
     .then((data) => {
-      if (data) {
         res.status(204).send(data.rows);
-      } else {
-        res.status(404).json({ error: "Not found" });
-      }
-    })
-    .catch();
+      }).catch(e=>{
+              console.log(e) 
+      });
 }
 
 function handleCourseUpdate(req, res) {
@@ -290,9 +290,64 @@ function handleanouncmentUpdate(req, res) {
     });
 }
 
+function handeleAdminSignUp(req, res) {
+  // Admin Add course function
+  const { title, descreption, capacity, role, email,password,fname,lname } = req.body;
+  const sql = `INSERT INTO user_course(title,descreption,capacity,role,email,password,fname,lname) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *;`;
+  client
+    .query(sql, [title, descreption, capacity, role, email,password,fname,lname])
+    .then((data) => {
+     const myId=data.rows[0].id
+     const myTitle=data.rows[0].title
+     const myDescreption=data.rows[0].descreption
+     const myCapacity=data.rows[0].capacity
+     const myRole=data.rows[0].role
+     const myEmail=data.rows[0].email
+     const myPassword=data.rows[0].password
+     const myFname=data.rows[0].fname
+     const myLname=data.rows[0].lname
+     console.log(myEmail);
+     const mysql = `INSERT INTO users(email,password,fname,lname,role) VALUES ($1,$2,$3,$4,$5) RETURNING *;`;
+     client
+       .query(mysql, [myEmail, myPassword, myFname, myLname, myRole ])
+       .then((data) => {
+        const ourID=data.rows[0].id;
+        const oursql = `INSERT INTO course (title,descreption,capacity,role,u_id) VALUES ($1,$2,$3,$4,$5) RETURNING *;`;
+        client
+          .query(oursql, [myTitle, myDescreption, myCapacity, myRole, ourID])
+          .then((data) => {
+            const oursql = `delete from course where id=${myId} RETURNING *;`;
+            client
+              .query(oursql)
+              .then((data) => {
+                  res.status(204).send(data.rows);
+                })          })
+      })
+       .catch((e) => {
+        console.log(e);
+      });
+    })
+}
+
+function handeleAdminCourse(req,res) {
+  const u_id =req.params.id
+  const { title, descreption, role} = req.body;
+  const capacity=40
+  const sql = `INSERT INTO course (title,descreption,capacity,role,u_id) VALUES ($1,$2,$3,$4,$5) RETURNING *;`;
+  client
+    .query(sql, [title, descreption, capacity, role, u_id])
+    .then((data) => {
+      res.status(200).send(data.rows);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+}
 client.connect().then(() => {
   app.listen(port, () => {
     console.log(`server is running is port ${port}`);
   });
 });
 /*// "`title:"JavaScript Scholarship",classroom:"1724",level:"begginers",courses:[{title:``,startDate:`22-5-2023`,endDate:`22-5-2023`},{title:`JavaScript fundementals`,startDate:`22-5-2023`,endDate:`22-5-2023`}]`;*/
+// myTitle,myDescreption,myDapacity,myRole,myEmail,myPassword,myFname,myLname
+//      data.rows[0]
